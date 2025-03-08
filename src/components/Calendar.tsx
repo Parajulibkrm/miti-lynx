@@ -1,7 +1,9 @@
 import { useMemo, useState } from "@lynx-js/react";
 import NepaliDate from "nepali-datetime";
+import { useNavigate } from "react-router";
 import { useCalendarData } from "../query/calendar.js";
 import { cn } from "../utils/cn.js";
+import { Header } from "./Header.jsx";
 import { TodayWidget } from "./TodayWidget.js";
 import { UpcomingEvents } from "./UpcomingEvents.jsx";
 
@@ -10,6 +12,7 @@ export function Calendar() {
 		return new NepaliDate();
 	}, []);
 
+	const nav = useNavigate();
 	const [currentNepaliDate] = useState(validYearAndMonth);
 	const { data: calendarData } = useCalendarData(currentNepaliDate);
 	console.log("calendarData", calendarData);
@@ -99,9 +102,19 @@ export function Calendar() {
 				Today
 			</text>
 			<TodayWidget />
-			<text className="text-md font-bold text-gray-800 flex flex-col my-2">
-				Upcoming Events
-			</text>
+			<view className="flex flex-col my-2">
+				<view className="flex flex-row justify-between">
+					<text className="text-md font-bold text-gray-800">
+						Upcoming Events
+					</text>
+					<text
+						bindtap={() => nav("/home")}
+						className="text-sm text-indigo-500"
+					>
+						View all &gt;&gt;
+					</text>
+				</view>
+			</view>
 			<UpcomingEvents
 				currentNepaliDate={currentNepaliDate}
 				calendarData={calendarData}

@@ -12,7 +12,9 @@
     "@tanstack/react-query": "^5.67.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "jotai": "^2.12.1",
     "nepali-datetime": "^1.4.0",
+    "react-router": "6",
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {

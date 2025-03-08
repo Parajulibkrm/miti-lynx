@@ -1,19 +1,13 @@
-import { useCallback, useEffect, useState } from "@lynx-js/react";
 import "./App.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import arrow from "./assets/arrow.png";
-import lynxLogo from "./assets/lynx-logo.png";
-import reactLynxLogo from "./assets/react-logo.png";
 import { Calendar } from "./components/Calendar.jsx";
-
-const queryClient = new QueryClient();
+import { Header } from "./components/Header.js";
 
 export function App() {
 	return (
-		<view className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-			<QueryClientProvider client={queryClient}>
+		<view className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
+			<view className="w-full max-w-4xl">
 				<Calendar />
-			</QueryClientProvider>
+			</view>
 		</view>
 	);
 }

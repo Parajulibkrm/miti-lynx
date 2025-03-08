@@ -119,6 +119,7 @@ export const useNextMonthData = (currentNepaliDate: NepaliDate) => {
 
 export async function fetchCalendarData(year: number, month: number) {
 	const cacheKey = getCalendarCacheKey(year, month);
+	console.log("cacheKey", cacheKey);
 
 	try {
 		// Try to get cached data first
