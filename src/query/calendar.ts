@@ -1,8 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-
+import { getCalendarCacheKey, storage } from "../lib/storage.js";
 import type { CalendarData, NewCalendarData } from "../types/calendar.types.js";
 
-type NepaliDate = any;
+type NepaliDate = {
+	getMonth(): number;
+	getYear(): number;
+	getDate(): number;
+	format(format: string): string;
+};
 
 export const padNumber = (num: number, length: number) =>
 	Number.parseInt(num.toString().padStart(length, "0"));
@@ -113,11 +118,33 @@ export const useNextMonthData = (currentNepaliDate: NepaliDate) => {
 };
 
 export async function fetchCalendarData(year: number, month: number) {
-	console.log(year, month);
-	const res = await fetch(
-		`https://data.miti.bikram.io/data/${year}/${month.toString().padStart(2, "0")}.json`,
-	);
-	console.log(res);
-	const data = await res.json();
-	return data;
+	const cacheKey = getCalendarCacheKey(year, month);
+
+	try {
+		// Try to get cached data first
+		const cachedData = await storage.getItem<NewCalendarData[]>(cacheKey);
+
+		// Attempt to fetch fresh data
+		try {
+			const res = await fetch(
+				`https://data.miti.bikram.io/data/${year}/${month.toString().padStart(2, "0")}.json`,
+			);
+			const freshData = await res.json();
+
+			// Update cache with fresh data
+			await storage.setItem(cacheKey, freshData);
+
+			return freshData;
+		} catch (error) {
+			console.log("Network error, using cached data:", error);
+			// If we have cached data, return it when fetch fails
+			if (cachedData) {
+				return cachedData;
+			}
+			throw error; // Re-throw if we have no cached data
+		}
+	} catch (error) {
+		console.error("Error fetching calendar data:", error);
+		throw error;
+	}
 }
