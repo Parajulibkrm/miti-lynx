@@ -3,6 +3,7 @@ import NepaliDate from "nepali-datetime";
 import { useCalendarData } from "../query/calendar.js";
 import { cn } from "../utils/cn.js";
 import { TodayWidget } from "./TodayWidget.js";
+import { UpcomingEvents } from "./UpcomingEvents.jsx";
 
 export function Calendar() {
 	const validYearAndMonth = useMemo(() => {
@@ -15,7 +16,10 @@ export function Calendar() {
 	const dayNames = ["आइत", "सोम", "मंगल", "बुध", "बिही", "शुक्र", "शनि"];
 
 	return (
-		<view className="flex flex-col gap-4">
+		<scroll-view
+			className="flex flex-col gap-4 h-[100vh]"
+			scroll-orientation="vertical"
+		>
 			<view className="w-full max-w-[800px] bg-white rounded-lg shadow-lg p-6">
 				{/* Calendar Header */}
 				<view className="flex items-center justify-between mb-6">
@@ -91,8 +95,17 @@ export function Calendar() {
 					})}
 				</view>
 			</view>
-			<text className="text-md font-bold text-gray-800">Today</text>
+			<text className="text-md font-bold text-gray-800 flex flex-col my-2">
+				Today
+			</text>
 			<TodayWidget />
-		</view>
+			<text className="text-md font-bold text-gray-800 flex flex-col my-2">
+				Upcoming Events
+			</text>
+			<UpcomingEvents
+				currentNepaliDate={currentNepaliDate}
+				calendarData={calendarData}
+			/>
+		</scroll-view>
 	);
 }

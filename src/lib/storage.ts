@@ -20,6 +20,8 @@ export const storage = {
 	},
 
 	async getItem<T>(key: string): Promise<T | null> {
+		console.log("getItem", key);
+		console.log(NativeModules.NativeLocalStorageModule);
 		try {
 			const value = NativeModules.NativeLocalStorageModule.getStorageItem(key);
 			return value ? (JSON.parse(value) as T) : null;
