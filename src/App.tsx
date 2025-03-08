@@ -34,7 +34,7 @@ export function App() {
 				</view>
 				<view className="Content">
 					<image src={arrow} className="Arrow" />
-					<text className="Description mt-[70rpx] text-2xl text-green-900">
+					<text className="text-[40px] mt-[70rpx] text-green-900">
 						Hello World
 					</text>
 					<text className="Hint">
