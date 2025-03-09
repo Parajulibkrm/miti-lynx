@@ -6,7 +6,7 @@ export function DarkModeToggle() {
 	return (
 		<text
 			bindtap={() => setDarkMode(!darkMode)}
-			className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700"
+			className="p-2 rounded-lg bg-gray-200 "
 		>
 			{darkMode ? "🌙" : "☀️"}
 		</text>

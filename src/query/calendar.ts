@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import NepaliDate from "nepali-datetime";
 import { getCalendarCacheKey, storage } from "../lib/storage.js";
 import type { CalendarData, NewCalendarData } from "../types/calendar.types.js";
 
@@ -30,7 +31,9 @@ const getNextMonth = (date: NepaliDate) => {
 
 export const useCalendarData = (currentNepaliDate: NepaliDate) => {
 	const queryClient = useQueryClient();
-
+	const isCurrentMonth =
+		currentNepaliDate.getMonth() === new NepaliDate().getMonth() &&
+		currentNepaliDate.getYear() === new NepaliDate().getYear();
 	/**
 	 * Naming is hard :D
 	 * the previous year may be the previous year or the same year
@@ -56,16 +59,17 @@ export const useCalendarData = (currentNepaliDate: NepaliDate) => {
 			padNumber(currentNepaliDate.getMonth() + 1, 2),
 		);
 	};
+	if (isCurrentMonth) {
+		queryClient.prefetchQuery({
+			queryKey: ["calendar", prevYear, prevMonth],
+			queryFn: fetchPreviousMonth,
+		});
 
-	queryClient.prefetchQuery({
-		queryKey: ["calendar", prevYear, prevMonth],
-		queryFn: fetchPreviousMonth,
-	});
-
-	queryClient.prefetchQuery({
-		queryKey: ["calendar", nextYear, nextMonth],
-		queryFn: fetchNextMonth,
-	});
+		queryClient.prefetchQuery({
+			queryKey: ["calendar", nextYear, nextMonth],
+			queryFn: fetchNextMonth,
+		});
+	}
 
 	return useQuery<NewCalendarData[]>({
 		queryKey: [

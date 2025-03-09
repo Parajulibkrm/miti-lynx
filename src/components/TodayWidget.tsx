@@ -1,17 +1,15 @@
-import NepaliDate from "nepali-datetime";
 import { useCalendarData } from "../query/calendar.js";
+import { NepaliDate, type NepaliDateType } from "../types/nepalidate.js";
 import { cn } from "../utils/cn.js";
 
 export function TodayWidget() {
-	const today = new NepaliDate("2081-11-14");
+	const today = new NepaliDate();
 	const { data: calendarData } = useCalendarData(today);
 
 	const todayData = calendarData?.find(
 		(day) => day.calendarInfo.dates.bs.full.en === today.format("YYYY-MM-DD"),
 	);
 	const isHoliday = todayData?.eventDetails.some((event) => event.isHoliday);
-	console.log(isHoliday);
-
 	if (!todayData) return null;
 
 	return (
@@ -34,9 +32,13 @@ export function TodayWidget() {
 							<text className="text-4xl font-bold text-gray-100 text-center">
 								{todayData.calendarInfo.dates.bs.day.np}
 							</text>
-							<text className="text-gray-100 text-center">Friday</text>
+							<text className="text-gray-100 text-center">
+								{todayData.calendarInfo.days.dayOfWeek.np}
+							</text>
 							<text className="text-sm text-gray-100 mt-1 text-center">
-								{todayData.calendarInfo.dates.ad.full.en}
+								{todayData.calendarInfo.dates.ad.day.en}{" "}
+								{todayData.calendarInfo.dates.ad.month.en},{" "}
+								{todayData.calendarInfo.dates.ad.year.en}
 							</text>
 						</view>
 					</view>
