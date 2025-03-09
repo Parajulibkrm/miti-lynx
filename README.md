@@ -5,13 +5,11 @@ This is an experimental build of Miti built with Lynx.
 
 ## Usage
 
-### 1. Start Development Server
+### 1. Download LynxExplorer App
 
-Launch the development server:
+Download and install the LynxExplorer APK from:
+[Download LynxExplorer APK](https://github.com/lynx-family/lynx/releases/latest/download/LynxExplorer-noasan-release.apk)
 
-```bash
-pnpm run dev
-```
 
 ### 2. Access the App
 
@@ -32,10 +30,14 @@ https://github.com/Parajulibkrm/miti-lynx/raw/refs/heads/main/dist/main.lynx.bun
 
 ## Installation
 
-### 1. Download LynxExplorer App
 
-Download and install the LynxExplorer APK from:
-[Download LynxExplorer APK](https://github.com/lynx-family/lynx/releases/latest/download/LynxExplorer-noasan-release.apk)
+### 1. Start Development Server
+
+Launch the development server:
+
+```bash
+pnpm run dev
+```
 
 ### 2. Project Setup
 
