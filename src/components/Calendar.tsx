@@ -1,4 +1,4 @@
-import { useMemo, useState } from "@lynx-js/react";
+import { useEffect, useMemo, useState } from "@lynx-js/react";
 import { useMainThreadRef } from "@lynx-js/react";
 import { useNavigate } from "react-router";
 import { useCalendarData } from "../query/calendar.js";

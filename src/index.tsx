@@ -6,8 +6,7 @@ import { Calendar } from "./components/Calendar.jsx";
 import { DateConverter } from "./components/DateConverter.jsx";
 import { Header } from "./components/Header.jsx";
 import "tailwindcss/utilities.css";
-
-const queryClient = new QueryClient();
+import { queryClient } from "./lib/persister.js";
 
 root.render(
 	<MemoryRouter>

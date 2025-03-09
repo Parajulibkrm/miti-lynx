@@ -1,57 +1,30 @@
-const CACHE_PREFIX = "calendar_cache_";
-const CACHE_TIMESTAMP_PREFIX = "calendar_timestamp_";
+export interface Storage {
+	getItem: (key: string) => string | null;
+	setItem: (key: string, value: string) => void;
+	removeItem: (key: string) => void;
+}
 
-export const storage = {
-	async setItem<T>(key: string, value: T) {
+export const storage: Storage = {
+	getItem(key: string): string | null {
+		if (!key) return null;
 		try {
-			const serializedValue = JSON.stringify(value);
-			NativeModules.NativeLocalStorageModule.setStorageItem(
-				key,
-				serializedValue,
-			);
-			// Store timestamp
-			NativeModules.NativeLocalStorageModule.setStorageItem(
-				`${CACHE_TIMESTAMP_PREFIX}${key}`,
-				Date.now().toString(),
-			);
+			return NativeModules.NativeLocalStorageModule.getStorageItem(key);
 		} catch (error) {
-			console.error("Error setting storage item:", error);
-		}
-	},
-
-	async getItem<T>(key: string): Promise<T | null> {
-		console.log("getItem", key);
-		console.log(NativeModules.NativeLocalStorageModule);
-		try {
-			const value = NativeModules.NativeLocalStorageModule.getStorageItem(key);
-			return value ? (JSON.parse(value) as T) : null;
-		} catch (error) {
-			console.error("Error getting storage item:", error);
 			return null;
 		}
 	},
 
-	async getCacheTimestamp(key: string): Promise<number | null> {
+	setItem(key: string, value: string): void {
+		if (!key || value === null || value === undefined) return;
 		try {
-			const timestamp = NativeModules.NativeLocalStorageModule.getStorageItem(
-				`${CACHE_TIMESTAMP_PREFIX}${key}
-      `,
-			);
-			return timestamp ? Number.parseInt(timestamp, 10) : null;
-		} catch (error) {
-			console.error("Error getting cache timestamp:", error);
-			return null;
-		}
+			NativeModules.NativeLocalStorageModule.setStorageItem(key, value);
+		} catch (error) {}
 	},
 
-	clearStorage() {
+	removeItem(key: string): void {
+		if (!key) return;
 		try {
-			NativeModules.NativeLocalStorageModule.clearStorage();
-		} catch (error) {
-			console.error("Error clearing storage:", error);
-		}
+			NativeModules.NativeLocalStorageModule.setStorageItem(key, "");
+		} catch (error) {}
 	},
 };
-
-export const getCalendarCacheKey = (year: number, month: number) =>
-	`${CACHE_PREFIX}${year}_${month.toString().padStart(2, "0")}`;

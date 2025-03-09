@@ -1,19 +1,13 @@
+import { useCallback, useEffect } from "@lynx-js/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import NepaliDate from "nepali-datetime";
-import { getCalendarCacheKey, storage } from "../lib/storage.js";
-import type { CalendarData, NewCalendarData } from "../types/calendar.types.js";
+import { NepaliDate, type NepaliDateType } from "../types/nepalidate.js";
 
-type NepaliDate = {
-	getMonth(): number;
-	getYear(): number;
-	getDate(): number;
-	format(format: string): string;
-};
+import type { CalendarData, NewCalendarData } from "../types/calendar.types.js";
 
 export const padNumber = (num: number, length: number) =>
 	Number.parseInt(num.toString().padStart(length, "0"));
 
-const getPreviousMonth = (date: NepaliDate) => {
+const getPreviousMonth = (date: NepaliDateType) => {
 	const month = date.getMonth() + 1;
 	const year = date.getYear();
 	return month === 1
@@ -21,7 +15,7 @@ const getPreviousMonth = (date: NepaliDate) => {
 		: { year, month: padNumber(month - 1, 2) };
 };
 
-const getNextMonth = (date: NepaliDate) => {
+const getNextMonth = (date: NepaliDateType) => {
 	const month = date.getMonth() + 1;
 	const year = date.getYear();
 	return month === 12
@@ -29,7 +23,7 @@ const getNextMonth = (date: NepaliDate) => {
 		: { year, month: padNumber(month + 1, 2) };
 };
 
-export const useCalendarData = (currentNepaliDate: NepaliDate) => {
+export const useCalendarData = (currentNepaliDate: NepaliDateType) => {
 	const queryClient = useQueryClient();
 	const isCurrentMonth =
 		currentNepaliDate.getMonth() === new NepaliDate().getMonth() &&
@@ -45,31 +39,44 @@ export const useCalendarData = (currentNepaliDate: NepaliDate) => {
 
 	const { year: nextYear, month: nextMonth } = getNextMonth(currentNepaliDate);
 
-	const fetchPreviousMonth = async () => {
+	const fetchPreviousMonth = useCallback(async () => {
 		return fetchCalendarData(prevYear, prevMonth);
-	};
+	}, [prevYear, prevMonth]);
 
-	const fetchNextMonth = async () => {
+	const fetchNextMonth = useCallback(async () => {
 		return fetchCalendarData(nextYear, nextMonth);
-	};
+	}, [nextYear, nextMonth]);
 
-	const fetchCurrentMonth = async () => {
+	const fetchCurrentMonth = useCallback(async () => {
 		return fetchCalendarData(
 			currentNepaliDate.getYear(),
 			padNumber(currentNepaliDate.getMonth() + 1, 2),
 		);
-	};
-	if (isCurrentMonth) {
-		queryClient.prefetchQuery({
-			queryKey: ["calendar", prevYear, prevMonth],
-			queryFn: fetchPreviousMonth,
-		});
+	}, [currentNepaliDate]);
 
-		queryClient.prefetchQuery({
-			queryKey: ["calendar", nextYear, nextMonth],
-			queryFn: fetchNextMonth,
-		});
-	}
+	// Only prefetch adjacent months once when viewing current month
+	useEffect(() => {
+		if (isCurrentMonth) {
+			queryClient.prefetchQuery({
+				queryKey: ["calendar", prevYear, prevMonth],
+				queryFn: fetchPreviousMonth,
+			});
+
+			queryClient.prefetchQuery({
+				queryKey: ["calendar", nextYear, nextMonth],
+				queryFn: fetchNextMonth,
+			});
+		}
+	}, [
+		isCurrentMonth,
+		prevYear,
+		prevMonth,
+		nextYear,
+		nextMonth,
+		queryClient,
+		fetchPreviousMonth,
+		fetchNextMonth,
+	]);
 
 	return useQuery<NewCalendarData[]>({
 		queryKey: [
@@ -82,7 +89,7 @@ export const useCalendarData = (currentNepaliDate: NepaliDate) => {
 	});
 };
 
-export const useYearlyData = (currentNepaliDate: NepaliDate) => {
+export const useYearlyData = (currentNepaliDate: NepaliDateType) => {
 	return useQuery<CalendarData>({
 		queryKey: [
 			"calendar",
@@ -100,7 +107,7 @@ export const useYearlyData = (currentNepaliDate: NepaliDate) => {
 	});
 };
 
-export const useTodayData = (currentNepaliDate: NepaliDate) => {
+export const useTodayData = (currentNepaliDate: NepaliDateType) => {
 	return useQuery<NewCalendarData>({
 		queryKey: ["today-data"],
 		queryFn: () =>
@@ -112,7 +119,7 @@ export const useTodayData = (currentNepaliDate: NepaliDate) => {
 	});
 };
 
-export const useNextMonthData = (currentNepaliDate: NepaliDate) => {
+export const useNextMonthData = (currentNepaliDate: NepaliDateType) => {
 	const { year, month } = getNextMonth(currentNepaliDate);
 	return useQuery<NewCalendarData[]>({
 		queryKey: ["calendar", year, month],
@@ -122,31 +129,16 @@ export const useNextMonthData = (currentNepaliDate: NepaliDate) => {
 };
 
 export async function fetchCalendarData(year: number, month: number) {
-	const cacheKey = getCalendarCacheKey(year, month);
-	console.log("cacheKey", cacheKey);
-
 	try {
-		// Try to get cached data first
-		const cachedData = await storage.getItem<NewCalendarData[]>(cacheKey);
-
-		// Attempt to fetch fresh data
 		try {
 			const res = await fetch(
 				`https://data.miti.bikram.io/data/${year}/${month.toString().padStart(2, "0")}.json`,
 			);
 			const freshData = await res.json();
-
-			// Update cache with fresh data
-			await storage.setItem(cacheKey, freshData);
-
 			return freshData;
 		} catch (error) {
 			console.log("Network error, using cached data:", error);
-			// If we have cached data, return it when fetch fails
-			if (cachedData) {
-				return cachedData;
-			}
-			throw error; // Re-throw if we have no cached data
+			throw error;
 		}
 	} catch (error) {
 		console.error("Error fetching calendar data:", error);
